@@ -1,4 +1,3 @@
-
 import React, { useContext, useState, useEffect } from 'react';
 import { Mic, ChevronLeft, ChevronRight, Heart, Share2, MessageSquarePlus } from 'lucide-react';
 import { AppContext } from '../App';
@@ -130,7 +129,11 @@ const QuoteViewScreen: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex justify-center space-x-3 pt-2">
                 <button
-                    onClick={() => toggleFavorite(currentQuote)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (currentQuote) toggleFavorite(currentQuote);
+                    }}
                     className={`p-3 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-900
                                 ${currentQuote.isFavorite ? 'bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 focus:ring-rose-500' 
                                                         : 'bg-neutral-700 hover:bg-neutral-600 text-neutral-300 hover:text-amber-300 focus:ring-amber-500'}`}
@@ -140,7 +143,11 @@ const QuoteViewScreen: React.FC = () => {
                     <Heart size={20} fill={currentQuote.isFavorite ? 'currentColor' : 'none'} />
                 </button>
                 <button
-                    onClick={openShareModal}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openShareModal();
+                    }}
                     className="p-3 rounded-full bg-neutral-700 hover:bg-neutral-600 text-neutral-300 hover:text-amber-300 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-neutral-900"
                     aria-label={t.shareQuote}
                     title={t.shareQuote}
@@ -148,7 +155,11 @@ const QuoteViewScreen: React.FC = () => {
                     <Share2 size={20} />
                 </button>
                 <button
-                    onClick={openReflectionModal}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openReflectionModal();
+                    }}
                     className={`p-3 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-900
                                 ${currentReflection ? 'bg-sky-500/20 text-sky-400 hover:bg-sky-500/30 focus:ring-sky-500' 
                                                      : 'bg-neutral-700 hover:bg-neutral-600 text-neutral-300 hover:text-amber-300 focus:ring-amber-500'}`}

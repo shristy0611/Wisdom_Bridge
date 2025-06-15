@@ -73,7 +73,11 @@ const QuoteOfTheDayDisplay: React.FC = () => {
       </blockquote>
       <div className="flex items-center justify-end space-x-2 pt-2 border-t border-neutral-700/50">
         <button
-            onClick={() => toggleFavorite(qotd)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleFavorite(qotd);
+            }}
             className={`p-2 rounded-full hover:bg-neutral-700/70 transition-colors 
                         ${qotd.isFavorite ? 'text-rose-400' : 'text-neutral-400 hover:text-rose-300'}`}
             aria-label={qotd.isFavorite ? t.removeFromFavorites : t.addToFavorites}
@@ -82,7 +86,11 @@ const QuoteOfTheDayDisplay: React.FC = () => {
             <Heart size={18} fill={qotd.isFavorite ? 'currentColor' : 'none'} />
         </button>
         <button
-            onClick={() => handleShareQotD(qotd)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleShareQotD(qotd);
+            }}
             className="p-2 rounded-full text-neutral-400 hover:text-green-300 hover:bg-neutral-700/70 transition-colors"
             aria-label={t.shareQuote}
             title={t.shareQuote}
@@ -90,7 +98,11 @@ const QuoteOfTheDayDisplay: React.FC = () => {
             <Share2 size={18} />
         </button>
         <button
-            onClick={() => handleViewFullQuote(qotd)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleViewFullQuote(qotd);
+            }}
             className="p-2 rounded-full text-neutral-400 hover:text-amber-300 hover:bg-neutral-700/70 transition-colors"
             aria-label={language === 'en' ? "View Full Quote" : "全文を見る"}
             title={language === 'en' ? "View Full Quote" : "全文を見る"}

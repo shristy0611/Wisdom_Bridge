@@ -200,8 +200,12 @@ const App: React.FC = () => {
         return newFavorites;
     });
 
-    showToast(toastMessage, "success");
+    // We need to show the toast AFTER the state updates are complete
+    setTimeout(() => {
+      showToast(toastMessage, "success");
+    }, 0);
 
+    // Update the isFavorite status in quoteData without changing the current quote
     setQuoteData(prevQuoteData => {
         if (!prevQuoteData) return null;
         return prevQuoteData.map(q =>
@@ -209,6 +213,7 @@ const App: React.FC = () => {
         );
     });
 
+    // Update Quote of the Day if it's the same quote
     setQuoteOfTheDay(prevQotD => {
         if (prevQotD && prevQotD.quote.id === quoteToToggle.id) {
             if (prevQotD.language === language) { // Ensure we only update QotD if it's in the current app language
@@ -217,6 +222,8 @@ const App: React.FC = () => {
         }
         return prevQotD;
     });
+    
+    // Update modal quote if it's the same quote
     setModalQuote(prevModalQuote => {
         if (prevModalQuote && prevModalQuote.id === quoteToToggle.id) {
             return { ...prevModalQuote, isFavorite: isNowFavorite };
