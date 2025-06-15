@@ -1,0 +1,8 @@
+{
+  "name": "Wisdom Bridge",
+  "description": "Find inspiration from Daisaku Ikeda's 'The New Human Revolution'. Enter a theme or feeling, and receive a relevant quote, its citation, and analysis. Powered by Gemini.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "prompt": ""
+}
