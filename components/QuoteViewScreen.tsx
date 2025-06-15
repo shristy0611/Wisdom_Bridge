@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Mic, ChevronLeft, ChevronRight, Heart, Share2, MessageSquarePlus } from 'lucide-react';
 import { AppContext } from '../App';
 import { translations, API_KEY_ERROR, GEMINI_FETCH_ERROR } from '../constants';
@@ -25,11 +25,37 @@ const QuoteViewScreen: React.FC = () => {
   
   const t = translations[language];
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  
+  // Store previous quotes to compare in the effect
+  const previousQuotesRef = useRef<QuoteData[] | null>(null);
 
+  // Only reset the index when quotes have actually changed (not just properties like isFavorite)
   useEffect(() => {
-    if (quotes && quotes.length > 0) {
+    // When quotes is null or empty, allow resetting index
+    if (!quotes || quotes.length === 0) {
+      setCurrentQuoteIndex(0);
+      previousQuotesRef.current = quotes;
+      return;
+    }
+    
+    // Handle first load of quotes
+    if (!previousQuotesRef.current) {
+      setCurrentQuoteIndex(0);
+      previousQuotesRef.current = quotes;
+      return;
+    }
+    
+    // Check if the quotes array has actually changed in content, not just properties
+    const prevQuotes = previousQuotesRef.current;
+    const quotesChanged = 
+      prevQuotes.length !== quotes.length ||
+      quotes.some((quote, i) => quote.id !== prevQuotes[i]?.id);
+    
+    if (quotesChanged) {
       setCurrentQuoteIndex(0);
     }
+    
+    previousQuotesRef.current = quotes;
   }, [quotes]);
   
   const handleRetry = () => {
