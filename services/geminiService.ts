@@ -93,33 +93,42 @@ const parseAndValidateGeminiResponse = (jsonResponseText: string, isSingleObject
 
 // Pick up USE_OLLAMA flag from env (support both Node and Vite)
 const USE_OLLAMA = String(getEnvVar('USE_OLLAMA')).toLowerCase() === 'true';
+console.log('🔄 USE_OLLAMA flag:', USE_OLLAMA);
 
 // Wrapper that chooses Ollama first (if enabled) with Gemini fallback
 export const fetchGuidance = async (theme: string, language: Language): Promise<QuoteData[]> => {
   if (USE_OLLAMA) {
+    console.log('🔄 Attempting to use Ollama first for theme:', theme);
     try {
       const ollamaResult = await fetchGuidanceFromOllama(theme, language);
       if (ollamaResult && ollamaResult.length > 0) {
+        console.log('✅ Successfully got quotes from Ollama:', ollamaResult.length);
         return ollamaResult;
       }
-      console.warn('Ollama returned no data, falling back to Gemini');
+      console.warn('⚠️ Ollama returned no data, falling back to Gemini');
     } catch (err) {
-      console.warn('Ollama fetch failed, falling back to Gemini', err);
+      console.warn('⚠️ Ollama fetch failed, falling back to Gemini', err);
     }
   }
+  console.log('🔄 Using Gemini for theme:', theme);
   return await fetchGuidanceFromGemini(theme, language);
 };
 
 export const fetchQuoteOfTheDayWithFallback = async (language: Language): Promise<QuoteData | null> => {
   if (USE_OLLAMA) {
+    console.log('🔄 Attempting to use Ollama first for Quote of the Day');
     try {
       const res = await fetchQuoteOfTheDayFromOllama(language);
-      if (res) return res;
-      console.warn('Ollama QOTD returned null, using Gemini fallback');
+      if (res) {
+        console.log('✅ Successfully got Quote of the Day from Ollama');
+        return res;
+      }
+      console.warn('⚠️ Ollama QOTD returned null, using Gemini fallback');
     } catch (err) {
-      console.warn('Ollama QOTD failed, using Gemini fallback', err);
+      console.warn('⚠️ Ollama QOTD failed, using Gemini fallback', err);
     }
   }
+  console.log('🔄 Using Gemini for Quote of the Day');
   return await fetchQuoteOfTheDay(language);
 };
 
