@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { AppContext } from '../App';
 import { translations, PREDEFINED_THEMES, API_KEY_ERROR, GEMINI_FETCH_ERROR } from '../constants';
 import { AppContextType } from '../types';
-import { fetchGuidanceFromGemini } from '../services/geminiService';
+import { fetchGuidance } from '../services/geminiService';
 import Header from './Header';
 import { Loader2 } from 'lucide-react';
 
@@ -47,7 +47,7 @@ const ExploreThemesScreen: React.FC = () => {
     // --- End Cache Check ---
 
     try {
-      const data = await fetchGuidanceFromGemini(themeDisplay, language);
+      const data = await fetchGuidance(themeDisplay, language);
       setQuoteData(data);
       if (data.length > 0) {
         addSearchToHistoryAndCache(themeDisplay, language, data);

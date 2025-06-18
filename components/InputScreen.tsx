@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Loader2, Search, Mic, MicOff, Trash2, History } from 'lucide-react';
 import { AppContext } from '../App';
 import { translations, API_KEY_ERROR, GEMINI_FETCH_ERROR } from '../constants';
-import { fetchGuidanceFromGemini } from '../services/geminiService';
+import { fetchGuidance } from '../services/geminiService';
 import { AppContextType, SearchHistoryItem, Language as AppLanguage, QuoteData } from '../types'; // Renamed Language to AppLanguage to avoid conflict
 import ErrorDisplay from './ErrorDisplay';
 
@@ -239,7 +239,7 @@ const InputScreen: React.FC = () => {
         setTranscription(currentTheme); 
 
         try {
-            const data = await fetchGuidanceFromGemini(currentTheme, language);
+            const data = await fetchGuidance(currentTheme, language);
             setQuoteData(data);
             if (data.length > 0) { 
               addSearchToHistoryAndCache(currentTheme, language, data);

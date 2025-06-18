@@ -15,7 +15,7 @@ import Toast from './components/Toast'; // New
 
 import { translations, MAX_HISTORY_ITEMS } from './constants';
 import { AppContextType, Language, QuoteData, SearchHistoryItem, CachedQuoteItem, QuoteOfTheDayItem, ReflectionItem, Page } from './types';
-import { checkApiKey, fetchQuoteOfTheDay as fetchQotDService } from './services/geminiService';
+import { checkApiKey, fetchQuoteOfTheDayWithFallback as fetchQotDService } from './services/geminiService';
 import * as storage from './utils/storage';
 
 export const AppContext = createContext<AppContextType | null>(null);

@@ -1,6 +1,7 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { QuoteData, Language, GeminiQuoteResponse, GeminiIndividualQuoteResponse } from '../types';
 import { API_KEY_ERROR, GEMINI_FETCH_ERROR } from '../constants';
+import { fetchGuidanceFromOllama, fetchQuoteOfTheDayFromOllama } from './ollamaService';
 
 const MODEL_NAME = 'gemini-2.5-flash-preview-04-17';
 let ai: GoogleGenAI | null = null;
@@ -84,6 +85,36 @@ const parseAndValidateGeminiResponse = (jsonResponseText: string, isSingleObject
     }
 };
 
+const USE_OLLAMA = process.env.USE_OLLAMA === 'true';
+
+// Wrapper that chooses Ollama first (if enabled) with Gemini fallback
+export const fetchGuidance = async (theme: string, language: Language): Promise<QuoteData[]> => {
+  if (USE_OLLAMA) {
+    try {
+      const ollamaResult = await fetchGuidanceFromOllama(theme, language);
+      if (ollamaResult && ollamaResult.length > 0) {
+        return ollamaResult;
+      }
+      console.warn('Ollama returned no data, falling back to Gemini');
+    } catch (err) {
+      console.warn('Ollama fetch failed, falling back to Gemini', err);
+    }
+  }
+  return await fetchGuidanceFromGemini(theme, language);
+};
+
+export const fetchQuoteOfTheDayWithFallback = async (language: Language): Promise<QuoteData | null> => {
+  if (USE_OLLAMA) {
+    try {
+      const res = await fetchQuoteOfTheDayFromOllama(language);
+      if (res) return res;
+      console.warn('Ollama QOTD returned null, using Gemini fallback');
+    } catch (err) {
+      console.warn('Ollama QOTD failed, using Gemini fallback', err);
+    }
+  }
+  return await fetchQuoteOfTheDay(language);
+};
 
 export const fetchGuidanceFromGemini = async (theme: string, language: Language): Promise<QuoteData[]> => {
   let jsonResponseText: string = "";
