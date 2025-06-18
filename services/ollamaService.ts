@@ -35,12 +35,24 @@ const parseOllamaJson = (
   isSingleObject: boolean = false,
 ): GeminiIndividualQuoteResponse[] | GeminiIndividualQuoteResponse | null => {
   let cleaned = jsonResponseText.trim();
-  const fenceRegex = /^```(?:json)?\s*\n?(.*?)\n?\s*```$/s;
+  console.log('🔍 Raw text to parse:', cleaned.substring(0, 100) + '...');
+  
+  // Remove any <think>...</think> blocks that Qwen3 might output
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  
+  // Try to extract JSON from markdown code blocks or standalone
+  const fenceRegex = /```(?:json)?\s*\n?([\s\S]*?)\n?\s*```|^\s*(\{[\s\S]*\})\s*$/s;
   const match = cleaned.match(fenceRegex);
-  if (match && match[1]) cleaned = match[1].trim();
+  if (match && (match[1] || match[2])) {
+    cleaned = (match[1] || match[2]).trim();
+  }
+  
+  console.log('🔍 Cleaned JSON to parse:', cleaned.substring(0, 100) + '...');
 
   try {
     const parsed = JSON.parse(cleaned);
+    
+    // Handle single object case
     if (isSingleObject) {
       if (
         parsed &&
@@ -49,20 +61,36 @@ const parseOllamaJson = (
         'citation' in parsed &&
         'analysis' in parsed
       ) {
+        console.log('✅ Successfully parsed single quote object');
         return parsed as GeminiIndividualQuoteResponse;
       }
+      console.error('❌ Parsed object missing required fields:', Object.keys(parsed));
       return null;
     }
 
+    // Handle array case
     if (Array.isArray(parsed)) {
       const allValid = parsed.every(
-        (item) => item && 'quote' in item && 'citation' in item && 'analysis' in item,
+        (item) => item && typeof item === 'object' && 'quote' in item && 'citation' in item && 'analysis' in item,
       );
-      return allValid ? (parsed as GeminiIndividualQuoteResponse[]) : null;
+      if (allValid) {
+        console.log('✅ Successfully parsed array of', parsed.length, 'quotes');
+        return parsed as GeminiIndividualQuoteResponse[];
+      }
+      console.error('❌ Some items in array missing required fields');
+      return null;
     }
+    
+    // If we got a single object but expected an array, wrap it
+    if (parsed && typeof parsed === 'object' && 'quote' in parsed && 'citation' in parsed && 'analysis' in parsed) {
+      console.log('⚠️ Got single quote object but expected array, wrapping it');
+      return [parsed as GeminiIndividualQuoteResponse];
+    }
+    
+    console.error('❌ Parsed JSON is neither valid array nor object:', typeof parsed);
     return null;
   } catch (err) {
-    console.error('Failed to parse Ollama JSON', err);
+    console.error('❌ Failed to parse Ollama JSON:', err);
     return null;
   }
 };
@@ -78,9 +106,22 @@ export const fetchGuidanceFromOllama = async (
   const systemInstructionJa =
     'あなたは池田大作著「新・人間革命」の専門家です。ユーザーのテーマに関連する最大5つの引用とそれぞれの正確な出典、簡潔な解説をJSONのみで返してください。';
 
-  const exampleJson = `[\n  {\n    \"quote\": \"The quote text 1\",\n    \"citation\": \"Vol. 1, \'Sunrise\' chap, p.XX\",\n    \"analysis\": \"Analysis 1\"\n  }\n]`;
+  const exampleJson = `[
+  {
+    "quote": "The quote text 1",
+    "citation": "Vol. 1, 'Sunrise' chap, p.XX",
+    "analysis": "Analysis 1"
+  }
+]`;
 
-  const prompt = `$${language === 'ja' ? systemInstructionJa : systemInstructionEn}\n\nUser theme: \"${theme}\". Output **only** the JSON array in this exact format:\n${exampleJson}`;
+  const prompt = `${language === 'ja' ? systemInstructionJa : systemInstructionEn}
+
+User theme: "${theme}"
+
+IMPORTANT: You must respond ONLY with valid JSON in this exact format:
+${exampleJson}
+
+Do not include any explanations, markdown formatting, or anything else outside the JSON array.`;
 
   const raw = await callOllama(prompt);
   console.log('📝 Raw Ollama response length:', raw.length);
@@ -105,13 +146,24 @@ export const fetchQuoteOfTheDayFromOllama = async (
   const instructionJa =
     '「新・人間革命」から普遍的な名言を一つ選び、その正確な出典と簡潔な解説をJSON オブジェクトで返してください。';
 
-  const exampleObj = `{\n  \"quote\": \"Quote text\",\n  \"citation\": \"Vol. 1, ...\",\n  \"analysis\": \"Analysis\"\n}`;
+  const exampleObj = `{
+  "quote": "Quote text",
+  "citation": "Vol. 1, ...",
+  "analysis": "Analysis"
+}`;
 
-  const prompt = `${language === 'ja' ? instructionJa : instructionEn}\nOutput **only** the JSON object in this format:\n${exampleObj}`;
+  const prompt = `${language === 'ja' ? instructionJa : instructionEn}
+
+IMPORTANT: You must respond ONLY with valid JSON in this exact format:
+${exampleObj}
+
+Do not include any explanations, markdown formatting, or anything else outside the JSON object.`;
 
   const raw = await callOllama(prompt);
+  console.log('📝 Raw Ollama QOTD response length:', raw.length);
   const parsed = parseOllamaJson(raw, true) as GeminiIndividualQuoteResponse | null;
   if (!parsed) return null;
+  console.log('✅ Successfully parsed Ollama QOTD response');
 
   return {
     id: generateQuoteId(parsed.quote, parsed.citation),
