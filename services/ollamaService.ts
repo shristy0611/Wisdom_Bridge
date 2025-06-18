@@ -2,9 +2,11 @@ import { QuoteData, Language, GeminiIndividualQuoteResponse } from '../types';
 import { generateQuoteId } from './geminiService';
 import { GEMINI_FETCH_ERROR } from '../constants';
 
-// A very small model may not contain the source book verbatim.  Allow the user to override via env.
-const MODEL_NAME = process.env.OLLAMA_MODEL ?? 'llama2:7b-chat';
-const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434/api/generate';
+const env = typeof import.meta !== 'undefined' ? (import.meta as any).env : process.env;
+const getEnvVar = (name: string): string | undefined => env?.[name] || env?.[`VITE_${name}`];
+
+const MODEL_NAME = getEnvVar('OLLAMA_MODEL') ?? 'llama2:7b-chat';
+const OLLAMA_URL = getEnvVar('OLLAMA_URL') ?? 'http://localhost:11434/api/generate';
 
 // ------------------ Helper ------------------
 const callOllama = async (prompt: string): Promise<string> => {

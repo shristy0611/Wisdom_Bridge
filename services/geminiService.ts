@@ -6,13 +6,20 @@ import { fetchGuidanceFromOllama, fetchQuoteOfTheDayFromOllama } from './ollamaS
 const MODEL_NAME = 'gemini-2.5-flash-preview-04-17';
 let ai: GoogleGenAI | null = null;
 
+const env = typeof import.meta !== 'undefined' ? (import.meta as any).env : process.env;
+
+const getEnvVar = (name: string): string | undefined => {
+  return env?.[name] || env?.[`VITE_${name}`];
+};
+
 const getGenAI = (): GoogleGenAI => {
   if (!ai) {
-    if (!process.env.API_KEY) {
+    const apiKey = getEnvVar('API_KEY');
+    if (!apiKey) {
       console.error("API_KEY environment variable is not set.");
       throw new Error(API_KEY_ERROR);
     }
-    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    ai = new GoogleGenAI({ apiKey });
   }
   return ai;
 };
@@ -34,9 +41,8 @@ export const generateQuoteId = (quote: string, citation: string): string => {
   return simpleHash(`${quotePart}_${citationPart}`);
 };
 
-
 export const checkApiKey = (): boolean => {
-  return !!process.env.API_KEY;
+  return !!getEnvVar('API_KEY');
 };
 
 // Helper function to parse and validate Gemini response
@@ -85,7 +91,8 @@ const parseAndValidateGeminiResponse = (jsonResponseText: string, isSingleObject
     }
 };
 
-const USE_OLLAMA = process.env.USE_OLLAMA === 'true';
+// Pick up USE_OLLAMA flag from env (support both Node and Vite)
+const USE_OLLAMA = String(getEnvVar('USE_OLLAMA')).toLowerCase() === 'true';
 
 // Wrapper that chooses Ollama first (if enabled) with Gemini fallback
 export const fetchGuidance = async (theme: string, language: Language): Promise<QuoteData[]> => {
