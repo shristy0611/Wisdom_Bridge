@@ -67,7 +67,7 @@ const ExploreThemesScreen: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       <Header title={t.exploreThemesTitle} />
-      <div className="flex-grow overflow-y-auto p-4 md:p-6 no-scrollbar">
+      <div className="flex-grow overflow-y-auto p-4 no-scrollbar">
         <h2 className="text-xl font-semibold text-amber-400 mb-4 text-center">{t.searchByTheme}</h2>
         {isLoading && (
           <div className="flex justify-center items-center my-8">
@@ -76,7 +76,7 @@ const ExploreThemesScreen: React.FC = () => {
           </div>
         )}
         {!isLoading && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {PREDEFINED_THEMES.map(theme => {
               const themeName = language === 'ja' ? theme.ja : theme.en;
               return (

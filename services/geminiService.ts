@@ -91,8 +91,8 @@ export const fetchGuidanceFromGemini = async (theme: string, language: Language)
     const genAIInstance = getGenAI();
 
     const systemInstruction = language === 'ja' ?
-      "あなたは池田大作著「新・人間革命」の専門家です。あなたの使命は、ユーザーのテーマに深く関連する、「新・人間革命」の日本語原文から直接引用した、最大5つの感動的な原文ままの引用、それぞれの極めて正確な出典（巻、章、節など、可能な限り具体的に）、そして各引用の簡潔な分析を提供することです。引用はユニークで、互いに補完的であるべきです。" :
-      "You are an expert on Daisaku Ikeda's 'The New Human Revolution'. Your purpose is to provide up to 5 inspirational and distinct quotes, their highly accurate citations (volume, chapter, etc., as specific as possible), and a brief analysis for each quote, all highly relevant to the user's theme. The quotes should be unique and complementary if possible.";
+      "あなたは池田大作著「新・人間革命」の専門家です。あなたの使命は、ユーザーのテーマに深く関連する、「新・人間革命」の日本語原文から直接引用した、最大5つの感動的な原文ままの引用、それぞれの極めて正確な出典（巻、章、節など、可能な限り具体的に）、そして各引用の簡潔な分析を提供することです。この分析は、池田大作先生の精神を反映した、共感的で、友好的で、思いやりのあるトーンで書かれるべきですが、先生になりすますことは避けてください。引用はユニークで、互いに補完的であるべきです。" :
+      "You are an expert on Daisaku Ikeda's 'The New Human Revolution'. Your purpose is to provide up to 5 inspirational and distinct quotes, their highly accurate citations (volume, chapter, etc., as specific as possible), and a brief analysis for each quote, all highly relevant to the user's theme. The analysis should be written in an empathetic, friendly, and caring tone, reflecting the spirit of Daisaku Ikeda, but *without* impersonating him. The quotes should be unique and complementary if possible.";
 
     const userPrompt = language === 'ja' ?
       `ユーザーのテーマ：「${theme}」。このテーマに深く関連する「新・人間革命」の日本語原文から直接引用した、最大5つの感動的な原文ままの引用を、それぞれの極めて正確な出典（例：第1巻「旭日」の章 P.XX）と簡潔な解説と共に提供してください。応答は以下のJSON形式の配列でお願いします。各要素が1つの引用に対応します：\n\`\`\`json\n[\n  {\n    "quote": "引用文1（日本語原文のまま）",\n    "citation": "出典1（例：第X巻「YYY」の章 P.ZZZ）",\n    "analysis": "解説文1"\n  }\n]\n\`\`\`\nもしテーマに完全に合致する引用が5つ未満の場合は、見つかった数だけを返してください。引用の原文忠実性、極めて高い関連性、そして出典の正確性が最重要です。出典には可能な限りページ番号を含めてください。` :
@@ -108,6 +108,11 @@ export const fetchGuidanceFromGemini = async (theme: string, language: Language)
       }
     });
     
+    // Check if result.text is defined before trimming
+    if (!result.text) {
+      console.error("Gemini API returned no text in the response.");
+      throw new Error(GEMINI_FETCH_ERROR + " (Empty response from Gemini)");
+    }
     jsonResponseText = result.text.trim();
     const parsedItems = parseAndValidateGeminiResponse(jsonResponseText, false) as GeminiIndividualQuoteResponse[] | null;
 
@@ -155,8 +160,8 @@ export const fetchQuoteOfTheDay = async (language: Language): Promise<QuoteData 
     const genAIInstance = getGenAI();
 
     const systemInstruction = language === 'ja' ?
-      "あなたは池田大作著「新・人間革命」の専門家です。あなたの使命は、「新・人間革命」の日本語原文から、広く感動を与える普遍的な引用を一つだけ選び、その極めて正確な出典（巻、章、節など、可能な限り具体的に）と簡潔な分析を提供することです。" :
-      "You are an expert on Daisaku Ikeda's 'The New Human Revolution'. Your purpose is to provide one universally inspirational quote from the original text, its highly accurate citation (volume, chapter, etc., as specific as possible), and a brief analysis.";
+      "あなたは池田大作著「新・人間革命」の専門家です。あなたの使命は、「新・人間革命」の日本語原文から、広く感動を与える普遍的な引用を一つだけ選び、その極めて正確な出典（巻、章、節など、可能な限り具体的に）と簡潔な分析を提供することです。この分析は、池田大作先生の精神を反映した、共感的で、友好的で、思いやりのあるトーンで書かれるべきですが、先生になりすますことは避けてください。" :
+      "You are an expert on Daisaku Ikeda's 'The New Human Revolution'. Your purpose is to provide one universally inspirational quote from the original text, its highly accurate citation (volume, chapter, etc., as specific as possible), and a brief analysis. The analysis should be written in an empathetic, friendly, and caring tone, reflecting the spirit of Daisaku Ikeda, but *without* impersonating him.";
 
     const userPrompt = language === 'ja' ?
       `「新・人間革命」の日本語原文から、広く感動を与える名言を一つだけ提供してください。出典（例：第1巻「旭日」の章 P.XX）と、その言葉の意義に関する簡潔な解説もお願いします。応答は以下のJSON形式の単一オブジェクトでお願いします：\n\`\`\`json\n{\n  "quote": "引用文（日本語原文のまま）",\n  "citation": "出典（例：第X巻「YYY」の章 P.ZZZ）",\n  "analysis": "解説文"\n}\n\`\`\`\n出典の正確性が非常に重要です。` :
@@ -172,6 +177,11 @@ export const fetchQuoteOfTheDay = async (language: Language): Promise<QuoteData 
         }
     });
 
+    // Check if result.text is defined before trimming
+    if (!result.text) {
+      console.error("Gemini API returned no text in the response for Quote of the Day.");
+      throw new Error(GEMINI_FETCH_ERROR + " (Empty response from Gemini for QotD)");
+    }
     jsonResponseText = result.text.trim();
     const parsedItem = parseAndValidateGeminiResponse(jsonResponseText, true) as GeminiIndividualQuoteResponse | null;
 

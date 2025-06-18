@@ -48,7 +48,7 @@ const Toast: React.FC<ToastProps> = ({ toastInfo, onDismiss }) => {
     >
       <div className={`flex items-center ${bgColor} ${textColor} p-3 rounded-lg shadow-xl min-w-[280px] max-w-md`}>
         <Icon size={20} className={`${iconColor} mr-2 flex-shrink-0`} />
-        <span className="text-sm font-medium flex-grow">{toastInfo.message}</span>
+        <span className="text-base md:text-lg font-medium flex-grow">{toastInfo.message}</span>
         <button 
             onClick={() => {
                 setIsVisible(false);

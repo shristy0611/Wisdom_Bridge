@@ -62,20 +62,20 @@ const QuoteCard: React.FC<QuoteCardProps> = ({ quoteItem, showAnalysis = false, 
         role="article"
         aria-labelledby={`quote-card-title-${quoteItem.id}`}
     >
-      <p id={`quote-card-title-${quoteItem.id}`} className="italic text-neutral-200 mb-2 leading-relaxed">"{quoteSnippet}"</p>
-      <p className="text-xs text-amber-500 font-medium mb-3">{quoteItem.citation}</p>
+      <p id={`quote-card-title-${quoteItem.id}`} className="italic text-neutral-200 mb-2 leading-relaxed text-base md:text-xl">"{quoteSnippet}"</p>
+      <p className="text-sm md:text-lg text-amber-500 font-medium mb-3">{quoteItem.citation}</p>
       
       {showAnalysis && (
         <div className="mb-3">
-          <h4 className="text-sm font-semibold text-amber-400 mb-1">{t.analysis}</h4>
-          <p className="text-xs text-neutral-300 whitespace-pre-wrap">{quoteItem.analysis.substring(0,150)}...</p>
+          <h4 className="text-base md:text-xl font-semibold text-amber-400 mb-1">{t.analysis}</h4>
+          <p className="text-sm md:text-base text-neutral-300 whitespace-pre-wrap">{quoteItem.analysis.substring(0,150)}...</p>
         </div>
       )}
 
       {reflectionText && (
          <div className="mb-3 mt-2 border-t border-neutral-700 pt-2">
-            <h4 className="text-sm font-semibold text-sky-400 mb-1">{language === 'en' ? 'Your Reflection:' : 'あなたの感想:'}</h4>
-            <p className="text-xs text-neutral-300 italic">"{reflectionText.substring(0,120)}{reflectionText.length > 120 ? '...' : ''}"</p>
+            <h4 className="text-base md:text-xl font-semibold text-sky-400 mb-1">{language === 'en' ? 'Your Reflection:' : 'あなたの感想:'}</h4>
+            <p className="text-sm md:text-base text-neutral-300 italic">"{reflectionText.substring(0,120)}{reflectionText.length > 120 ? '...' : ''}"</p>
         </div>
       )}
 

@@ -54,7 +54,7 @@ const Footer: React.FC = () => {
                             aria-current={isActive ? 'page' : undefined}
                         >
                             <Icon size={22} strokeWidth={isActive? 2.5 : 2} />
-                            <span className={`text-[0.65rem] mt-1 ${isActive ? 'font-medium' : 'font-normal'}`}>{item.label}</span>
+                            <span className={`text-xs mt-1 ${isActive ? 'font-medium' : 'font-normal'}`}>{item.label}</span>
                         </button>
                     );
                 })}

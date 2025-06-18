@@ -86,7 +86,7 @@ const QuoteViewScreen: React.FC = () => {
     return (
         <div className="flex flex-col flex-grow justify-center items-center text-center p-4">
             <h2 className="text-2xl font-semibold mb-4 text-neutral-200">{t.findingQuoteTitle}</h2>
-            <p className="text-neutral-400 mb-8">{t.findingQuoteSubtitle}</p>
+            <p className="text-lg md:text-xl text-neutral-400 mb-8">{t.findingQuoteSubtitle}</p>
             <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-amber-500"></div>
         </div>
     );
@@ -116,7 +116,7 @@ const QuoteViewScreen: React.FC = () => {
             <h2 className="text-xl font-semibold mb-4 text-neutral-200">
               {language === 'en' ? 'No guidance found for this theme.' : 'このテーマに関する指導は見つかりませんでした。'}
             </h2>
-            <p className="text-neutral-400 mb-8">
+            <p className="text-lg md:text-xl text-neutral-400 mb-8">
               {language === 'en' ? 'Please try a different theme or refine your search.' : '別のテーマを試すか、検索を調整してください。'}
             </p>
              <button
@@ -139,17 +139,17 @@ const QuoteViewScreen: React.FC = () => {
   };
   
   return (
-    <div className="flex flex-col flex-grow p-4 md:p-6 space-y-4 overflow-y-auto no-scrollbar pt-6 pb-4">
+    <div className="flex flex-col flex-grow p-4 space-y-4 overflow-y-auto no-scrollbar">
         {currentQuote && (
           <>
-            <div className="bg-neutral-800/70 p-4 md:p-5 rounded-lg shadow-lg relative">
-                <p className="text-lg md:text-xl italic text-neutral-100 leading-relaxed text-center">"{currentQuote.quote}"</p>
-                <p className="mt-3 text-amber-400 font-semibold text-center text-xs md:text-sm">{currentQuote.citation}</p>
+            <div className="bg-neutral-800/70 p-4 rounded-lg shadow-lg relative">
+                <p className="text-xl md:text-2xl italic text-neutral-100 leading-relaxed text-center">"{currentQuote.quote}"</p>
+                <p className="mt-3 text-amber-400 font-semibold text-center text-sm md:text-base">{currentQuote.citation}</p>
             </div>
             
-            <div className="bg-neutral-800/70 p-4 md:p-5 rounded-lg shadow-lg">
+            <div className="bg-neutral-800/70 p-4 rounded-lg shadow-lg">
                 <h3 className="text-md font-semibold text-amber-500 mb-2">{t.analysis}</h3>
-                <p className="text-neutral-300 text-sm leading-relaxed whitespace-pre-wrap">{currentQuote.analysis}</p>
+                <p className="text-neutral-300 text-base md:text-lg leading-relaxed whitespace-pre-wrap">{currentQuote.analysis}</p>
             </div>
 
             {/* Action Buttons */}
@@ -198,39 +198,48 @@ const QuoteViewScreen: React.FC = () => {
           </>
         )}
 
+        {/* Navigation */}
         {quotes.length > 1 && (
-            <div className="flex items-center justify-center space-x-4 pt-2">
-                <button 
+            <div className="flex justify-between items-center pt-2">
+                <button
                     onClick={() => navigateQuote('prev')}
                     disabled={currentQuoteIndex === 0}
-                    className="p-2 rounded-full bg-neutral-700 hover:bg-neutral-600 text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    aria-label={language === 'en' ? "Previous Quote" : "前の引用"}
+                    className={`flex items-center space-x-1 py-2 px-4 rounded-full text-base
+                            ${currentQuoteIndex === 0 
+                                ? 'text-neutral-500 cursor-not-allowed' 
+                                : 'text-neutral-300 hover:text-amber-400 hover:bg-neutral-800/50'
+                            }`}
                 >
-                    <ChevronLeft size={24} />
+                    <ChevronLeft size={18} />
+                    <span className="text-sm md:text-base">{t.previousQuote}</span>
                 </button>
-                <span className="text-sm text-neutral-400 font-medium">
-                    {t.quoteIndicator
-                        .replace('{current}', (currentQuoteIndex + 1).toString())
-                        .replace('{total}', quotes.length.toString())}
-                </span>
-                <button 
+                <div className="text-neutral-500 text-sm md:text-base">
+                    {currentQuoteIndex + 1} / {quotes.length}
+                </div>
+                <button
                     onClick={() => navigateQuote('next')}
                     disabled={currentQuoteIndex === quotes.length - 1}
-                    className="p-2 rounded-full bg-neutral-700 hover:bg-neutral-600 text-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    aria-label={language === 'en' ? "Next Quote" : "次の引用"}
+                    className={`flex items-center space-x-1 py-2 px-4 rounded-full text-base
+                            ${currentQuoteIndex === quotes.length - 1 
+                                ? 'text-neutral-500 cursor-not-allowed' 
+                                : 'text-neutral-300 hover:text-amber-400 hover:bg-neutral-800/50'
+                            }`}
                 >
-                    <ChevronRight size={24} />
+                    <span className="text-sm md:text-base">{t.nextQuote}</span>
+                    <ChevronRight size={18} />
                 </button>
             </div>
         )}
 
-        <button
-            onClick={() => setPage('input')}
-            className="mt-4 mb-2 mx-auto bg-neutral-700 hover:bg-neutral-600 text-neutral-100 hover:text-amber-300 font-medium py-3 px-8 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-neutral-900 flex-shrink-0"
-        >
-            <Mic size={18} className="mr-2.5" />
-            <span>{t.findAnother}</span>
-        </button>
+        <div className="pt-2 text-center">
+            <button
+                onClick={() => setPage('input')}
+                className="bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-amber-400 font-medium py-2 px-6 rounded-full inline-flex items-center transition-colors text-sm md:text-base"
+            >
+                <ChevronLeft size={18} className="mr-1" />
+                <span>{t.backToSearch}</span>
+            </button>
+        </div>
     </div>
   );
 };

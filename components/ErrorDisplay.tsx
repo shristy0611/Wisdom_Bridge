@@ -1,4 +1,3 @@
-
 import React, { useContext } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { AppContext } from '../App';
@@ -8,9 +7,11 @@ import { AppContextType } from '../types';
 interface ErrorDisplayProps {
   message: string;
   onRetry?: () => void;
+  linkText?: string;
+  linkUrl?: string;
 }
 
-const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ message, onRetry }) => {
+const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ message, onRetry, linkText, linkUrl }) => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AppContext not found");
     const { language } = context as AppContextType;
@@ -20,7 +21,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ message, onRetry }) => {
         <div className="bg-rose-900/40 border border-rose-600/60 text-neutral-100 p-4 rounded-lg flex flex-col items-center text-center m-4 shadow-md">
             <AlertTriangle className="text-rose-400 mb-3" size={32} />
             <h3 className="font-semibold text-rose-300 mb-2">{t.errorTitle}</h3>
-            <p className="mb-4 text-rose-200/90 text-sm">{message}</p>
+            <p className="mb-4 text-rose-200/90 text-base md:text-lg">{message}</p>
             {onRetry && (
                 <button
                     onClick={onRetry}
@@ -28,6 +29,14 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ message, onRetry }) => {
                 >
                     {t.retry}
                 </button>
+            )}
+            {linkText && linkUrl && (
+                <a 
+                    href={linkUrl}
+                    className="text-rose-300 hover:text-rose-200 underline mt-3 text-base md:text-lg"
+                >
+                    {linkText}
+                </a>
             )}
         </div>
     );

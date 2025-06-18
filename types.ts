@@ -153,6 +153,19 @@ export interface Translations {
     closeModal: string;
     confirm: string; // Generic confirm
     cancel: string; // Generic cancel
+    previousQuote: string; // For quote navigation
+    nextQuote: string; // For quote navigation
+    backToSearch: string; // For returning to search from quote view
+    searchTitle: string; // For input screen title
+    searchSubtitle: string; // For input screen subtitle
+    searchInputPlaceholder: string; // For input field placeholder
+    clearInput: string; // For clear input button
+    startVoiceInput: string; // For voice input button
+    stopVoiceInput: string; // For stop voice input button
+    search: string; // For search button
+    recentSearches: string; // For recent searches title
+    delete: string; // For delete button
+    setupApiKey: string; // For API key setup link
   };
 }
 

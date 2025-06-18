@@ -22,15 +22,20 @@ const QuoteOfTheDayDisplay: React.FC = () => {
   const t = translations[language];
 
   useEffect(() => {
-    // Fetch QOTD if not already loaded for today or if quote object is missing
-    if (!quoteOfTheDay || !quoteOfTheDay.quote?.id ) { 
+    // Fetch QOTD if:
+    // 1. Not already loaded
+    // 2. Quote object is missing
+    // 3. Language of the quote doesn't match current UI language
+    if (!quoteOfTheDay || 
+        !quoteOfTheDay.quote?.id || 
+        quoteOfTheDay.language !== language) { 
       fetchAndSetQuoteOfTheDay().catch(err => {
         // Error already logged in App.tsx, can show toast here if desired
         // showToast(t.errorFetchingQuoteOfTheDay, 'error');
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchAndSetQuoteOfTheDay]); // Run once on mount and when function reference changes (should be stable)
+  // Include language in the dependency array to refetch when language changes
+  }, [fetchAndSetQuoteOfTheDay, language, quoteOfTheDay]);
 
   const handleViewFullQuote = (qotd: QuoteData) => {
     setQuoteData([qotd]);
@@ -45,45 +50,55 @@ const QuoteOfTheDayDisplay: React.FC = () => {
 
   if (!quoteOfTheDay && !context.error?.includes(t.errorFetchingQuoteOfTheDay)) { // Initial loading state (no error yet)
     return (
-      <div className="mt-6 p-4 bg-neutral-800/60 rounded-lg shadow-md w-full max-w-sm text-center animate-pulse">
-        <Loader2 size={24} className="mx-auto animate-spin text-amber-500 mb-2" />
-        <p className="text-sm text-neutral-400">{t.loadingQuoteOfTheDay}</p>
+      <div className="mt-8 p-5 bg-neutral-800/60 rounded-lg shadow-md w-full max-w-md text-center animate-pulse">
+        <Loader2 size={28} className="mx-auto animate-spin text-amber-500 mb-3" />
+        <p className="text-base text-neutral-400">{t.loadingQuoteOfTheDay}</p>
       </div>
     );
   }
   
   if (!quoteOfTheDay?.quote?.id) { // Error or no QOTD available
      return (
-      <div className="mt-6 p-4 bg-neutral-800/60 rounded-lg shadow-md w-full max-w-sm text-center">
-        <AlertTriangle size={24} className="mx-auto text-rose-400 mb-2" />
-        <p className="text-sm text-neutral-400">{t.noQuoteOfTheDay}</p>
+      <div className="mt-8 p-5 bg-neutral-800/60 rounded-lg shadow-md w-full max-w-md text-center">
+        <AlertTriangle size={28} className="mx-auto text-rose-400 mb-3" />
+        <p className="text-base text-neutral-400">{t.noQuoteOfTheDay}</p>
+      </div>
+    );
+  }
+
+  // If the quote language doesn't match the UI language, show loading state while fetching
+  if (quoteOfTheDay.language !== language) {
+    return (
+      <div className="mt-8 p-5 bg-neutral-800/60 rounded-lg shadow-md w-full max-w-md text-center animate-pulse">
+        <Loader2 size={28} className="mx-auto animate-spin text-amber-500 mb-3" />
+        <p className="text-base text-neutral-400">{t.loadingQuoteOfTheDay}</p>
       </div>
     );
   }
 
   const qotd = quoteOfTheDay.quote;
-  const quoteSnippet = qotd.quote.length > 120 ? qotd.quote.substring(0, 120) + "..." : qotd.quote;
+  const quoteSnippet = qotd.quote.length > 140 ? qotd.quote.substring(0, 140) + "..." : qotd.quote;
 
   return (
-    <div className="mt-6 p-4 bg-neutral-800/80 rounded-lg shadow-xl w-full max-w-sm animate-fade-in-up">
-      <h3 className="text-lg font-semibold text-amber-400 mb-3 text-center">{t.quoteOfTheDayTitle}</h3>
-      <blockquote className="mb-3">
-        <p className="italic text-neutral-200 text-sm leading-relaxed">"{quoteSnippet}"</p>
-        <cite className="block text-xs text-amber-500/90 mt-2 text-right not-italic">- {qotd.citation}</cite>
+    <div className="mt-8 p-5 bg-neutral-800/80 rounded-lg shadow-xl w-full max-w-md animate-fade-in-up">
+      <h3 className="text-xl font-semibold text-amber-400 mb-4 text-center">{t.quoteOfTheDayTitle}</h3>
+      <blockquote className="mb-4">
+        <p className="italic text-neutral-200 text-base md:text-lg leading-relaxed">"{quoteSnippet}"</p>
+        <cite className="block text-sm text-amber-500/90 mt-3 text-right not-italic">- {qotd.citation}</cite>
       </blockquote>
-      <div className="flex items-center justify-end space-x-2 pt-2 border-t border-neutral-700/50">
+      <div className="flex items-center justify-end space-x-3 pt-3 border-t border-neutral-700/50">
         <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               toggleFavorite(qotd);
             }}
-            className={`p-2 rounded-full hover:bg-neutral-700/70 transition-colors 
+            className={`p-3 rounded-full hover:bg-neutral-700/70 transition-colors 
                         ${qotd.isFavorite ? 'text-rose-400' : 'text-neutral-400 hover:text-rose-300'}`}
             aria-label={qotd.isFavorite ? t.removeFromFavorites : t.addToFavorites}
             title={qotd.isFavorite ? t.removeFromFavorites : t.addToFavorites}
         >
-            <Heart size={18} fill={qotd.isFavorite ? 'currentColor' : 'none'} />
+            <Heart size={20} fill={qotd.isFavorite ? 'currentColor' : 'none'} />
         </button>
         <button
             onClick={(e) => {
@@ -91,11 +106,11 @@ const QuoteOfTheDayDisplay: React.FC = () => {
               e.stopPropagation();
               handleShareQotD(qotd);
             }}
-            className="p-2 rounded-full text-neutral-400 hover:text-green-300 hover:bg-neutral-700/70 transition-colors"
+            className="p-3 rounded-full text-neutral-400 hover:text-green-300 hover:bg-neutral-700/70 transition-colors"
             aria-label={t.shareQuote}
             title={t.shareQuote}
         >
-            <Share2 size={18} />
+            <Share2 size={20} />
         </button>
         <button
             onClick={(e) => {
@@ -103,11 +118,11 @@ const QuoteOfTheDayDisplay: React.FC = () => {
               e.stopPropagation();
               handleViewFullQuote(qotd);
             }}
-            className="p-2 rounded-full text-neutral-400 hover:text-amber-300 hover:bg-neutral-700/70 transition-colors"
+            className="p-3 rounded-full text-neutral-400 hover:text-amber-300 hover:bg-neutral-700/70 transition-colors"
             aria-label={language === 'en' ? "View Full Quote" : "全文を見る"}
             title={language === 'en' ? "View Full Quote" : "全文を見る"}
         >
-            <Eye size={18} />
+            <Eye size={20} />
         </button>
       </div>
     </div>

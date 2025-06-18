@@ -74,7 +74,7 @@ const JournalScreen: React.FC = () => {
     <div className="flex flex-col h-full">
       <Header title={t.journalTitle} />
       {quotesWithReflections.length === 0 ? (
-        <div className="flex-grow flex flex-col justify-center items-center text-center p-6 text-neutral-400">
+        <div className="flex-grow flex flex-col justify-center items-center text-center p-4 text-neutral-400">
           <BookMarked size={48} className="mb-4 text-neutral-500" />
           <p className="mb-2 text-lg">{t.noReflectionsMessage}</p>
            <button

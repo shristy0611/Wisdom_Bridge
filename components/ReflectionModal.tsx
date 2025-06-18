@@ -83,13 +83,13 @@ const ReflectionModal: React.FC = () => {
         </button>
 
         <h2 id="reflection-modal-title" className="text-xl font-semibold text-amber-400 mb-1">{existingReflection ? t.editReflection : t.addReflection}</h2>
-        <p className="text-xs text-neutral-400 mb-4 italic">{modalTitle}</p>
+        <p className="text-sm md:text-base text-neutral-400 mb-4 italic">{modalTitle}</p>
         
         <textarea
           value={reflectionText}
           onChange={(e) => setReflectionText(e.target.value)}
           placeholder={t.reflectionPlaceholder}
-          className="w-full p-3 bg-neutral-900 border border-neutral-600 rounded-md text-neutral-100 placeholder-neutral-500 focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200 min-h-[150px] resize-y text-sm"
+          className="w-full p-3 bg-neutral-900 border border-neutral-600 rounded-md text-neutral-100 placeholder-neutral-500 focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200 min-h-[150px] resize-y text-base md:text-lg"
           rows={6}
           aria-label={t.reflectionPlaceholder}
         />
@@ -98,7 +98,7 @@ const ReflectionModal: React.FC = () => {
           {existingReflection && (
             <button
               onClick={handleDelete}
-              className="px-5 py-2.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-medium transition-colors text-sm flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-neutral-800"
+              className="px-5 py-2.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-medium transition-colors text-sm md:text-base flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-neutral-800"
             >
               <Trash2 size={16} className="mr-2" />
               {t.deleteReflection}
@@ -106,14 +106,14 @@ const ReflectionModal: React.FC = () => {
           )}
           <button
             onClick={() => setIsReflectionModalOpen(false)}
-            className="px-5 py-2.5 rounded-lg bg-neutral-600 hover:bg-neutral-500 text-neutral-100 font-medium transition-colors text-sm flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2 focus:ring-offset-neutral-800"
+            className="px-5 py-2.5 rounded-lg bg-neutral-600 hover:bg-neutral-500 text-neutral-100 font-medium transition-colors text-sm md:text-base flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2 focus:ring-offset-neutral-800"
             >
             {t.cancel}
           </button>
           <button
             onClick={handleSave}
             disabled={reflectionText.trim() === '' && !existingReflection} // Disable if new and empty
-            className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-neutral-900 font-semibold transition-colors text-sm flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-neutral-900 font-semibold transition-colors text-sm md:text-base flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <Save size={16} className="mr-2" />
             {t.saveReflection}

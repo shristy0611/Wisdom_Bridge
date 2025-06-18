@@ -374,99 +374,125 @@ const InputScreen: React.FC = () => {
 
 
   return (
-    <div className="flex flex-col flex-grow p-4 md:p-6 justify-between">
-      <div className="flex-grow">
-        <p id="status-paragraph" className={`text-center min-h-[2.25rem] mb-3 text-sm ${currentStatusColorClass}`}>
-            {currentStatusText}
-        </p>
-        
-        {localError && !isLoading && ( // Only show ErrorDisplay if not loading, to prevent clash with "Processing" status
-          <div className="mb-4">
-            <ErrorDisplay 
-                message={localError} // ErrorDisplay takes the message directly
-                onRetry={ (globalError || localError === t.errorApiKey || localError === t.errorFetchingGuidance || localError.includes("theme")) ? () => { setError(null); setLocalError(null); setVoiceCapturedTheme(false); } : undefined} 
-            />
+    <div className="flex flex-col flex-grow p-4">
+      <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-center text-neutral-100">{t.searchTitle}</h2>
+      <p className="text-lg md:text-xl text-neutral-400 mb-6 text-center max-w-md mx-auto">
+          {t.searchSubtitle}
+      </p>
+
+      <div className="w-full max-w-md mx-auto mb-8">
+          <div className="w-full">
+              <textarea
+                  value={themeInput}
+                  onChange={(e) => {
+                      setThemeInput(e.target.value);
+                      setLocalError(null);
+                      // If user types after voice input, don't show "Theme captured successfully"
+                      setVoiceCapturedTheme(false);
+                  }}
+                  className="w-full bg-neutral-800/80 rounded-lg p-4 text-xl md:text-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-neutral-800 min-h-[100px] resize-y"
+                  placeholder={t.searchInputPlaceholder}
+                  disabled={isLoading}
+                  rows={3}
+              />
+              
+              <div className="flex justify-between mt-3 gap-2">
+                  {themeInput && !isListening && !isLoading && (
+                      <button
+                          onClick={() => {
+                              setThemeInput('');
+                              setLocalError(null);
+                              setVoiceCapturedTheme(false);
+                          }}
+                          className="flex items-center justify-center h-12 px-4 bg-neutral-700 text-neutral-400 hover:text-rose-400 transition-colors rounded-lg"
+                          aria-label={t.clearInput}
+                          title={t.clearInput}
+                          disabled={isLoading}
+                      >
+                          <Trash2 size={20} className="mr-2" />
+                          <span className="text-sm md:text-base">{t.clearInput}</span>
+                      </button>
+                  )}
+                  
+                  <div className="flex flex-grow justify-end gap-2">
+                      <button
+                          onClick={!isLoading ? handleToggleListening : undefined}
+                          className={`flex items-center justify-center h-12 px-4 rounded-lg transition-colors flex-1
+                                   ${isListening 
+                                     ? 'bg-rose-600 text-white animate-pulse' 
+                                     : 'bg-neutral-700 text-neutral-300 hover:bg-neutral-600 hover:text-amber-300'
+                                   }
+                                   ${speechSupportError || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          aria-label={isListening ? t.stopVoiceInput : t.startVoiceInput}
+                          title={isListening ? t.stopVoiceInput : t.startVoiceInput}
+                          disabled={!!speechSupportError || isLoading}
+                      >
+                          {isListening ? <MicOff size={20} className="mr-2" /> : <Mic size={20} className="mr-2" />}
+                          <span className="text-sm md:text-base">{isListening ? t.stopVoiceInput : t.startVoiceInput}</span>
+                      </button>
+                      
+                      <button
+                          onClick={handleFetchGuidance}
+                          className={`flex items-center justify-center h-12 px-4 rounded-lg flex-1
+                                   ${!themeInput.trim() || isLoading 
+                                     ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed' 
+                                     : 'bg-amber-600 text-neutral-900 hover:bg-amber-500'}`}
+                          disabled={!themeInput.trim() || isLoading}
+                          aria-label={t.search}
+                          title={t.search}
+                      >
+                          {isLoading ? <Loader2 size={20} className="animate-spin mr-2" /> : <Search size={20} className="mr-2" />}
+                          <span className="text-sm md:text-base">{t.search}</span>
+                      </button>
+                  </div>
+              </div>
           </div>
-        )}
 
-        <div className="flex items-start space-x-3 mb-6">
-            <textarea
-                value={themeInput}
-                onChange={(e) => {
-                    const newTheme = e.target.value;
-                    setThemeInput(newTheme);
-                    setTranscription(newTheme); 
-                    setVoiceCapturedTheme(false); // Typing clears voice captured status
-                    if (!isListening && !speechSupportError) {
-                        // Clear non-critical local errors when user types
-                        if(localError && !speechSupportError && !localError.includes(t.errorApiKey) && !localError.includes(t.errorFetchingGuidance) && !localError.includes("Microphone access denied") && !localError.includes("No speech detected") && !localError.includes("Microphone issue")) {
-                            setLocalError(null);
-                        }
-                    }
-                }}
-                placeholder={t.inputPlaceholder}
-                className="flex-grow p-3.5 bg-neutral-800 border border-neutral-700/60 rounded-lg text-neutral-100 placeholder-neutral-500 focus:ring-1 focus:ring-amber-500/70 focus:border-amber-500/70 transition-colors duration-200 shadow-sm min-h-[100px] resize-none"
-                rows={3}
-                disabled={isLoading || isListening}
-                aria-label="Theme input"
-            />
-            <div className="flex-shrink-0 h-[52px] pt-[calc(0.875rem-1px)]"> 
-                 {renderMicButtonContent()}
-            </div>
-        </div>
-
-        {searchHistory.length > 0 && (
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-semibold text-neutral-400 flex items-center">
-                <History size={16} className="mr-1.5 text-neutral-500" />
-                {t.searchHistoryTitle}
-              </h3>
-            </div>
-            <ul className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar pr-1">
-              {searchHistory.map((item) => (
-                <li key={item.id} className="flex items-center justify-between bg-neutral-800/60 rounded-md group">
-                  <button
-                    onClick={() => handleHistoryItemClick(item)}
-                    className="flex-grow text-left text-sm text-neutral-300 group-hover:text-amber-400  group-hover:bg-neutral-700/50 p-2 rounded-l-md transition-colors truncate"
-                    title={t.historyItemAriaLabel.replace('{theme}', item.theme)}
-                    aria-label={t.historyItemAriaLabel.replace('{theme}', item.theme)}
-                  >
-                    {item.theme}
-                  </button>
-                  <button
-                    onClick={() => deleteSearchHistoryItem(item.id)}
-                    className="p-2 text-neutral-500 hover:text-rose-400 group-hover:bg-neutral-700/50 rounded-r-md transition-colors focus:outline-none"
-                    title={t.deleteHistoryItemAriaLabel.replace('{theme}', item.theme)}
-                    aria-label={t.deleteHistoryItemAriaLabel.replace('{theme}', item.theme)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </li>
-              ))}
-            </ul>
+          <div className={`text-center mt-2 min-h-[1.5rem] text-base md:text-lg ${currentStatusColorClass}`}>
+              {currentStatusText}
           </div>
-        )}
+      </div>
 
-      </div> 
-      
-      <div className="mt-auto pt-4"> 
-        <button
-            onClick={handleFetchGuidance}
-            disabled={isLoading || isListening || !apiKeyAvailable || !themeInput.trim()}
-            className="w-full bg-amber-600 hover:bg-amber-700 text-neutral-900 font-semibold py-3.5 px-6 rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500/70 focus:ring-offset-2 focus:ring-offset-neutral-900
-                       disabled:bg-neutral-700 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:shadow-none transform active:scale-[0.98]"
-        >
-            {isLoading && !isListening ? ( 
-                <Loader2 size={22} className="animate-spin mr-2" />
-            ) : (
-                <Search size={20} className="mr-2" strokeWidth={2.5}/>
-            )}
-            <span>{t.submitTheme}</span>
-        </button>
-         {!apiKeyAvailable && !(localError && localError.includes(t.errorApiKey)) && ( // Show API key error if not already displayed by localError
-             <p className="text-xs text-rose-400 text-center mt-3">{t.errorApiKey}</p>
-         )}
+      <div className="w-full max-w-lg mx-auto">
+          <div className={`mb-4 p-4 bg-neutral-800/70 rounded-lg ${searchHistory.length > 0 ? '' : 'hidden'}`}>
+              <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-lg md:text-xl text-amber-400 font-medium flex items-center gap-2">
+                      <History size={18} />
+                      {t.recentSearches}
+                  </h3>
+              </div>
+
+              <ul className="space-y-2 max-h-48 overflow-y-auto">
+                  {searchHistory.map((item) => (
+                      <li key={item.id} className="flex justify-between items-center">
+                          <button
+                              onClick={() => handleHistoryItemClick(item)}
+                              className="text-neutral-300 hover:text-amber-300 transition-colors text-left truncate max-w-[80%] text-base md:text-lg"
+                              disabled={isLoading}
+                          >
+                              {item.theme}
+                              <span className="text-xs md:text-sm text-neutral-500 ml-2">
+                                  {item.language === 'en' ? 'EN' : 'JP'}
+                              </span>
+                          </button>
+                          <button
+                              onClick={() => deleteSearchHistoryItem(item.id)}
+                              className="text-neutral-500 hover:text-rose-400 transition-colors p-1"
+                              title={t.delete}
+                              aria-label={`${t.delete} ${item.theme}`}
+                              disabled={isLoading}
+                          >
+                              <Trash2 size={16} />
+                          </button>
+                      </li>
+                  ))}
+              </ul>
+          </div>
+
+          {apiKeyAvailable === false && (
+              <ErrorDisplay message={t.errorApiKey} linkText={t.setupApiKey} linkUrl="#setup-api-key" />
+          )}
+
       </div>
     </div>
   );
