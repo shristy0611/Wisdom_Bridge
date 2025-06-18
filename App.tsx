@@ -43,6 +43,7 @@ const App: React.FC = () => {
   const [modalQuote, setModalQuote] = useState<QuoteData | null>(null);
 
   const prevLanguageRef = useRef<Language>(language);
+  const fetchingQotDRef = useRef<boolean>(false);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToastInfo({ id: Date.now().toString(), message, type });
@@ -52,6 +53,12 @@ const App: React.FC = () => {
     const todayStr = new Date().toISOString().split('T')[0];
     const currentAppLanguage = language; 
 
+    if (fetchingQotDRef.current) {
+      console.log('🛑 Already fetching Quote of the Day, skipping duplicate call');
+      return;
+    }
+    fetchingQotDRef.current = true;
+
     if (quoteOfTheDay && 
         quoteOfTheDay.dateFetched === todayStr && 
         quoteOfTheDay.language === currentAppLanguage &&
@@ -60,6 +67,7 @@ const App: React.FC = () => {
       if (quoteOfTheDay.quote.isFavorite !== isFav) {
         setQuoteOfTheDay(prevQotD => prevQotD ? ({ ...prevQotD, quote: { ...prevQotD.quote, isFavorite: isFav } }) : null);
       }
+      fetchingQotDRef.current = false;
       return; 
     }
 
@@ -70,6 +78,7 @@ const App: React.FC = () => {
         storedQotD.quote?.id) {
       const isFav = favoriteQuotes.some(fq => fq.id === storedQotD.quote.id);
       setQuoteOfTheDay({ ...storedQotD, quote: { ...storedQotD.quote, isFavorite: isFav } });
+      fetchingQotDRef.current = false;
       return; 
     }
     try {
@@ -89,6 +98,8 @@ const App: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Error in fetchAndSetQuoteOfTheDay (App.tsx):", err.message);
+    } finally {
+      fetchingQotDRef.current = false;
     }
   }, [language, favoriteQuotes, quoteOfTheDay]); 
 
@@ -108,7 +119,13 @@ const App: React.FC = () => {
 
   // Effect 1: Fetch QotD whenever its dependencies change (language, favoriteQuotes via fetchAndSetQuoteOfTheDay callback)
   useEffect(() => {
-    fetchAndSetQuoteOfTheDay();
+    let isActive = true;
+    if (isActive) {
+      fetchAndSetQuoteOfTheDay();
+    }
+    return () => {
+      isActive = false;
+    };
   }, [fetchAndSetQuoteOfTheDay]);
 
   // Effect 2: Handle UI changes specifically when language changes
